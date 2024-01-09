@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import * as React from 'react';
-import Button from '@mui/material/Button';
+import { Button } from '@mui/material';
 
 function App() {
   const [questions, setQuestions] = useState([])
@@ -9,10 +9,12 @@ function App() {
   const [difficulty, setDifficulty] = useState('easy');
   const [amount, setAmount] = useState(10);
   const [starterDiv, setStarterDiv] = useState(true)
+  const [score, setScore] = useState(0)
   const [quizDiv, setQuizDiv] = useState(false)
   const [resultDiv, setResultDiv] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [btnStyle, setbtnStyle] = useState('outlined')
+  const [inputChecked, setInputChecked] = useState(false)
+  const [isDisable, setIsDisable] = useState(true)
 
 
   const apiUrl = `https://opentdb.com/api.php?amount=${amount}&category=${category}&difficulty=${difficulty}&type=multiple`;
@@ -20,6 +22,12 @@ function App() {
   useEffect(() => {
     fetchQuestions();
   }, [category, difficulty,]);
+
+  function Results(selectedOption) {
+    if (selectedOption === questions[currentIndex].correct_answer) {
+      setScore(score + 1)
+    }
+  }
 
   function fetchQuestions() {
     fetch(apiUrl)
@@ -65,22 +73,26 @@ function App() {
   function StartQuiz() {
     setStarterDiv(false)
     setQuizDiv(true)
-    console.log(questions);
   }
 
   function Next() {
     setCurrentIndex(currentIndex + 1)
+    setInputChecked(false)
+    setIsDisable(true)
+    Results()
     if (currentIndex === questions.length - 1) {
       setQuizDiv(false)
       setResultDiv(true)
+      Results()
     }
   }
   function select(index, e) {
     const value = e.target.value
-    setbtnStyle('contained')
-    console.log(value);
-  }
+    setInputChecked()
+    Results(value)
+    setIsDisable(false)
 
+  }
   function Restart() {
     setResultDiv(false)
     setStarterDiv(true)
@@ -91,6 +103,7 @@ function App() {
     </div>
   }
   const currentQuestion = questions[currentIndex]
+  const isLastQuestion = currentIndex === questions.length - 1
   return (
     <div className="App">
       {starterDiv
@@ -156,10 +169,22 @@ function App() {
         <div className='QuizDiv'>
           <h2>{currentIndex + 1 + '-'} {currentQuestion.question}</h2>
           {currentQuestion.options.map(function (item, index) {
-            return <div >
-              <Button variant={btnStyle} name='options' onClick={(e) => select(index, e)} value={item}>{item}</Button>
+            return <div key={index} className='option'>
+              <input
+                onChange={(e) => select(index, e)}
+                type='radio'
+                name='options'
+                checked={inputChecked}
+                id={`option-${index}`}
+                value={item}
+              />
+              <label htmlFor={`option-${index}`}>{item}</label>
             </div>
           })}
+
+          <Button variant="contained" disabled={isDisable} onClick={Next}>{!isLastQuestion ? 'Next' : 'Submit'}</Button>
+
+
         </div>
         :
         <span></span>}
@@ -167,13 +192,12 @@ function App() {
       {resultDiv
         ?
         <div className='ResultDiv'>
-          {/* Render result page here */}
+          <h3>{score}/{questions.length}</h3>
+          <Button variant='contained' onClick={Restart}>Restart</Button>
         </div>
         :
         <span></span>}
 
-      <div className='QuizDiv'></div>
-      <div className='ResultDiv'></div>
     </div>
   );
 }
