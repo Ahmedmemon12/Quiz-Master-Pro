@@ -135,12 +135,11 @@ h1 {
   width: 400px;
   color: rgb(255, 255, 255);
   font-weight: 800;
-  background-image: url('C:\Users\kk\Documents\New folder\Quiz-Master-Pro\quiz-master-pro\src\result-22-5659.gif');
+  background-image: url('./result-22-5659.gif');
   background-repeat: no-repeat;
   background-size: contain;
 
 }
-/* YourComponent.css */
 
 .form-api {
   max-width: 400px;
